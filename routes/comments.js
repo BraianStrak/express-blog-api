@@ -2,10 +2,6 @@ var express = require('express');
 var router = express.Router();
 var comment_controller = require('../controllers/commentController');
 
-
-// GET catalog home page. THIS CORRESPONDS TO website.com/comment because that is the url to get to this router
-router.get('/', comment_controller.index);
-
 // GET request for creating a comment. NOTE This must come before routes that display comment (uses id).
 router.get('/create', comment_controller.comment_create_get);
 
