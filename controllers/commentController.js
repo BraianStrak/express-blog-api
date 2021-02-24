@@ -39,3 +39,4 @@ exports.comment_update_get = function(req, res) {
 // Handle comment update on POST.
 exports.comment_update_post = function(req, res) {
     res.send('NOT IMPLEMENTED: comment update POST');
+};
