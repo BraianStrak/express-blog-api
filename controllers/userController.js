@@ -1,8 +1,8 @@
 var async = require('async');
 var User = require('../models/user');
-var bcrypt = require('bcryptjs');
 
-//test imports to check bug 
+var bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const passport = require("passport");
 
 const { body,validationResult } = require("express-validator");
@@ -52,7 +52,24 @@ exports.user_login_get = function(req, res) {
 };
 
 exports.user_login_post = function(req, res, next) {
-    res.send('NOT IMPLEMENTED: user login POST');
+    passport.authenticate('local', {session: false}, (err, user, info) => {
+        if (err || !user) {
+            return res.status(400).json({
+                message: 'Something is not right',
+                user : user
+            });
+        }
+
+    req.login(user, {session: false}, (err) => {
+        if (err) {
+            res.send(err);
+        }
+
+        // generate a signed json web token with the contents of user object and return it in the response
+        const token = jwt.sign(user, 'your_jwt_secret');
+           return res.json({user, token});
+        });
+    })(req, res);
 };
 
 exports.user_logout_get = function(req, res) {
