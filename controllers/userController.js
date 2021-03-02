@@ -22,10 +22,38 @@ exports.user_create_get = function(req, res, next) {
     res.send('NOT IMPLEMENTED: user create GET');
 };
 
-// Handle user create on POST.
-exports.user_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: user create POST');
-};
+// Handles user creation on POST
+exports.user_create_post = [
+
+    body('username', 'User name required').trim().isLength({ min: 1 }).escape(),
+    body('password', 'Password required').isLength({ min: 8 }), //I don't think passwords should be escaped.
+
+    // Process request after validation and sanitization.
+    (req, res, next) => {
+        const errors = validationResult(req);
+
+        bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
+            // if err, do something
+            // otherwise, store hashedPassword+user in DB
+            if(err){
+                return next(err);
+            } else {
+                var user = new User (
+                    {
+                     username: req.body.username,
+                     password: hashedPassword,
+                    }
+                )
+
+                user.save((error) => {
+                    if (error) {
+                      return next(error);
+                    }
+                });
+            }
+        });
+    }
+];
 
 // Display user delete form on GET.
 exports.user_delete_get = function(req, res) {
