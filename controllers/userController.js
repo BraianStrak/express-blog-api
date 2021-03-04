@@ -31,11 +31,13 @@ exports.user_create_post = [
     // Process request after validation and sanitization.
     (req, res, next) => {
         const errors = validationResult(req);
+        console.log("creating user");
 
         bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
             // if err, do something
             // otherwise, store hashedPassword+user in DB
             if(err){
+                console.log("Error in creating user: " + err);
                 return next(err);
             } else {
                 var user = new User (
@@ -47,9 +49,12 @@ exports.user_create_post = [
 
                 user.save((error) => {
                     if (error) {
+                      console.log("Error in saving user: " + error);
                       return next(error);
                     }
                 });
+
+                res.end();
             }
         });
     }
@@ -76,28 +81,28 @@ exports.user_update_post = function(req, res) {
 };
 
 exports.user_login_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: user login GET');
+    res.send('logged in as: ' + req.user.username);
 };
 
 exports.user_login_post = function(req, res, next) {
     passport.authenticate('local', {session: false}, (err, user, info) => {
         if (err || !user) {
             return res.status(400).json({
-                message: 'Something is not right',
+                message: 'Something is not right: ' + err,
                 user : user
             });
         }
 
-    req.login(user, {session: false}, (err) => {
-        if (err) {
-            res.send(err);
-        }
+        req.login(user, {session: false}, (err) => {
+            if (err) {
+                res.send(err);
+            }
 
         // generate a signed json web token with the contents of user object and return it in the response
         const token = jwt.sign(user, 'your_jwt_secret');
            return res.json({user, token});
         });
-    })(req, res);
+    })(req, res, next);
 };
 
 exports.user_logout_get = function(req, res) {
