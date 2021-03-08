@@ -85,15 +85,15 @@ exports.user_login_get = function(req, res) {
 };
 
 exports.user_login_post = function(req, res, next) {
-    passport.authenticate('local', {session: false}, (err, user, info) => {
-        if (err || !user) {
+    passport.authenticate('local', {session: false}, (err, User, info) => {
+        if (err || !User) {
             return res.status(400).json({
                 message: 'Something is not right: ' + err,
-                user : user
+                User : User
             });
         }
 
-        req.login(user, {session: false}, (err) => {
+        req.login(User, {session: false}, (err) => {
             if (err) {
                 res.send(err);
             }
