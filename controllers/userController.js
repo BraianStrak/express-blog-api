@@ -24,40 +24,13 @@ exports.user_create_get = function(req, res, next) {
 
 // Handles user creation on POST
 exports.user_create_post = [
-
-    body('username', 'User name required').trim().isLength({ min: 1 }).escape(),
-    body('password', 'Password required').isLength({ min: 8 }), //I don't think passwords should be escaped.
-
-    // Process request after validation and sanitization.
-    (req, res, next) => {
-        const errors = validationResult(req);
-        console.log("creating user");
-
-        bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
-            // if err, do something
-            // otherwise, store hashedPassword+user in DB
-            if(err){
-                console.log("Error in creating user: " + err);
-                return next(err);
-            } else {
-                var user = new User (
-                    {
-                     username: req.body.username,
-                     password: hashedPassword,
-                    }
-                )
-
-                user.save((error) => {
-                    if (error) {
-                      console.log("Error in saving user: " + error);
-                      return next(error);
-                    }
-                });
-
-                res.end();
-            }
-        });
-    }
+  passport.authenticate('signup', { session: false }),
+  async (req, res, next) => {
+    res.json({
+      message: 'Signup successful',
+      user: req.user
+    });
+  }
 ];
 
 // Display user delete form on GET.
@@ -85,24 +58,34 @@ exports.user_login_get = function(req, res) {
 };
 
 exports.user_login_post = function(req, res, next) {
-    passport.authenticate('local', {session: false}, (err, User, info) => {
-        if (err || !User) {
-            return res.status(400).json({
-                message: 'Something is not right: ' + err,
-                User : User
-            });
-        }
-
-        req.login(User, {session: false}, (err) => {
-            if (err) {
-                res.send(err);
+    async (req, res, next) => {
+        passport.authenticate(
+          'login',
+          async (err, user, info) => {
+            try {
+              if (err || !user) {
+                const error = new Error('An error occurred.');
+                return next(error);
+              }
+    
+              req.login(
+                user,
+                { session: false },
+                async (error) => {
+                  if (error) return next(error);
+    
+                  const body = { _id: user._id, email: user.email };
+                  const token = jwt.sign({ user: body }, 'TOP_SECRET');
+    
+                  return res.json({ token });
+                }
+              );
+            } catch (error) {
+              return next(error);
             }
-
-        // generate a signed json web token with the contents of user object and return it in the response
-        const token = jwt.sign(user, 'your_jwt_secret');
-           return res.json({user, token});
-        });
-    })(req, res, next);
+          }
+        )(req, res, next);
+      }
 };
 
 exports.user_logout_get = function(req, res) {
