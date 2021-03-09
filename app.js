@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const passport = require('passport');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -49,4 +50,8 @@ mongoose.connect(mongoDB,  {useNewUrlParser : true, useUnifiedTopology : true});
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, "mongoDB connection error: "));
 
+//only signed in users can access routes in /post
+app.use('/user', passport.authenticate('jwt', { session: false }), postsRouter);
+
 module.exports = app;
+

@@ -51,3 +51,22 @@ new localStrategy(
     }
 )
 );
+
+const JWTstrategy = require('passport-jwt').Strategy;
+const ExtractJWT = require('passport-jwt').ExtractJwt;
+//verifies token has been signed with the secret or key set during logging in, if the token is valid user details are passed to the next middleware.
+passport.use(
+  new JWTstrategy(
+    {
+      secretOrKey: 'TOP_SECRET',
+      jwtFromRequest: ExtractJWT.fromUrlQueryParameter('secret_token')
+    },
+    async (token, done) => {
+      try {
+        return done(null, token.user);
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
+);

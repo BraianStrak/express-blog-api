@@ -57,14 +57,14 @@ exports.user_login_get = function(req, res) {
     res.send('logged in as: ' + req.user.username);
 };
 
-exports.user_login_post = function(req, res, next) {
-    async (req, res, next) => {
+exports.user_login_post = async(req, res, next) => {
+    //async (req, res, next) => {
         passport.authenticate(
           'login',
           async (err, user, info) => {
             try {
               if (err || !user) {
-                const error = new Error('An error occurred.');
+                const error = new Error('An error occurred.' + err);
                 return next(error);
               }
     
@@ -86,7 +86,7 @@ exports.user_login_post = function(req, res, next) {
           }
         )(req, res, next);
       }
-};
+//};
 
 exports.user_logout_get = function(req, res) {
     res.send('NOT IMPLEMENTED: user logout GET');

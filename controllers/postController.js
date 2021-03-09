@@ -2,9 +2,13 @@ var async = require('async');
 var post = require('../models/post');
 
 // Display list of all posts.
-exports.index = function(req, res) {
-    res.send('NOT IMPLEMENTED: index');
-};
+exports.index = function(req, res, next) {
+    res.json({
+        message: 'You made it to the secure route',
+        user: req.user,
+        token: req.query.secret_token
+    })
+}
 
 // Display list of all posts.
 exports.post_list = function(req, res) {
